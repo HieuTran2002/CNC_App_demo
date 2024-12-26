@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block navbtn %}
+<button class="mx-1 rounded bg-green-300 px-3 py-1 hover:bg-pink-300 transform transition-transform duration-300 hover:scale-125" onclick="triggerEvent("finetune_confirm)" >Fine-tune</button>
+{% endblock %}
+
+{% block content %}
+<div id="container" class="h-full w-full flex-1 flex flex-col">
+  <div class="flex-1 grid w-screen grid-cols-3 grid-rows-2 text-center mb-0 max">
+    <div class="row-span-2 bg-green-300">
+      <img id="result1" class="object-cover overflow-auto" src="">
+    </div>
+    <div class="col-span-2 align-between">
+      <div>
+        <table class="table-auto w-full border-collapse border border-slate-400">
+          <thead>
+            <tr>
+              <th class="border border-slate-400">Song</th>
+              <th class="border border-slate-400">duck</th>
+              <th class="border border-slate-400">chek</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="border border-slate-400">9mm</td>
+              <td class="border border-slate-400">Malcolm Lockyer</td>
+              <td class="border border-slate-400">
+                <div class="flex justify-center items-center">
+                  <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400">Witchy Woman</td>
+              <td class="border border-slate-400">The Eagles</td>
+              <td class="border border-slate-400">
+                <div class="flex justify-center items-center">
+                  <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400">Shining Star</td>
+              <td class="border border-slate-400">Earth, Wind, and Fire</td>
+              <td class="border border-slate-400">
+                <div class="flex justify-center items-center">
+                  <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400">Shining Star</td>
+              <td class="border border-slate-400">Earth, Wind, and Fire</td>
+              <td class="border border-slate-400">
+                <div class="flex justify-center items-center">
+                  <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400">Shining Star</td>
+              <td class="border border-slate-400">Earth, Wind, and Fire</td>
+              <td class="border border-slate-400">
+                <div class="flex justify-center items-center">
+                  <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-400">Shining Star</td>
+              <td class="border border-slate-400">Earth, Wind, and Fire</td>
+              <td class="border border-slate-400">
+                <div class="flex justify-center items-center">
+                  <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bg-cyan-200">
+          <img src="/video_feed">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
