@@ -27,10 +27,6 @@ class WebcamManager:
             self.camera = None
 
     def get_frame(self) -> Optional[np.ndarray]:
-        """Get a single frame from the camera
-        Returns:
-            Optional[np.ndarray]: BGR image if successful, None otherwise
-        """
         if not self.camera or not self.is_running:
             if not self.initialize_camera():
                 return None
@@ -42,10 +38,6 @@ class WebcamManager:
         return frame
 
     def create_test_image(self, text: str = 'Hello from OpenCV!') -> np.ndarray:
-        """Create a test image with text
-        Returns:
-            np.ndarray: BGR image
-        """
         height, width = 1080, 1920
         img = np.zeros((height, width, 3), dtype=np.uint8)
         cv2.putText(img, text, (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 3, (40, 42, 52), 5, cv2.LINE_AA)

@@ -147,7 +147,7 @@ class FlaskApp:
         img_base64 = base64.b64encode(img_bytes).decode('utf-8')
         
         # Define the URL of the Flask API endpoint
-        url = f"http://127.0.0.1:{self.app.config['PORT']}/process_image"
+        url = f"http://0.0.0.0:{self.app.config['PORT']}/process_image"
         
         # Create the payload with the base64 image and element ID
         payload = {
@@ -182,7 +182,7 @@ class FlaskApp:
         return jsonify({"status": "success"})
 
     def run(self, debug=True):
-        self.app.run(debug=debug, port=self.app.config['PORT'])
+        self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
 
 if __name__ == '__main__':
     flask_app = FlaskApp()
