@@ -40,7 +40,7 @@ class FlaskApp:
                     print(f"Removed: {file_path}")
 
     def register_routes(self):
-        # Main routes
+        """Main routes""" 
         self.app.route('/')(self.pdf_viewer)
         self.app.route('/ft')(self.finetune_viewer)
         self.app.route('/image')(self.image)
@@ -66,6 +66,7 @@ class FlaskApp:
         return render_template('pdf.html')
 
     def upload_file(self):
+        """Save PDF file into uploads directoty."""
         if 'pdf' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
 
@@ -99,6 +100,7 @@ class FlaskApp:
         return buffer.tobytes()
 
     def image(self):
+        """No longer used"""
         uploaded_files = cv2.imread("src/pics/loyd.jpeg")
         return Response(self.encode_frame(uploaded_files), mimetype='image/jpeg')
 
@@ -141,7 +143,6 @@ class FlaskApp:
 
     def send_image_to_server(self, mat_image, element_id):
         """Function for users to send their Mat image and ID directly."""
-        # Convert Mat image to base64
         _, img_buffer = cv2.imencode('.jpg', mat_image)
         img_bytes = img_buffer.tobytes()
         img_base64 = base64.b64encode(img_bytes).decode('utf-8')
@@ -181,14 +182,16 @@ class FlaskApp:
         self.event_manager.trigger_event("button_clicked", data)
         return jsonify({"status": "success"})
 
-    def run(self, debug=True):
+    def run(self, debug=False):
         self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
 
 if __name__ == '__main__':
     flask_app = FlaskApp()
 
+    # Clear the 'uploads' directory upon exit.
     import atexit
     atexit.register(flask_app.clear_upload_folder)
 
+    # Start the server
     flask_app.run(debug=True)
 
