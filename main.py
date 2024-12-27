@@ -50,6 +50,7 @@ class FlaskApp:
         self.app.route('/trigger_button', methods=['POST'])(self.trigger_button)
         self.app.route('/process_image', methods=['POST'])(self.process_image)
         self.app.route('/get_image_path/<element_id>', methods=['GET'])(self.get_image_path)
+        self.app.route('/manual')(self.manual)
 
     def register_event_handlers(self):
         def on_button_click(data):
@@ -103,6 +104,9 @@ class FlaskApp:
         """No longer used"""
         uploaded_files = cv2.imread("src/pics/loyd.jpeg")
         return Response(self.encode_frame(uploaded_files), mimetype='image/jpeg')
+
+    def manual(self):
+        return render_template('manual.html')
 
     def generate_frames(self):
         """Generator for video streaming"""
@@ -182,6 +186,7 @@ class FlaskApp:
         self.event_manager.trigger_event("button_clicked", data)
         return jsonify({"status": "success"})
 
+
     def run(self, debug=False):
         self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
 
@@ -190,7 +195,7 @@ if __name__ == '__main__':
 
     # Clear the 'uploads' directory upon exit.
     import atexit
-    atexit.register(flask_app.clear_upload_folder)
+    atexit.register(flask_app.cleanup_upload_folder)
 
     # Start the server
     flask_app.run(debug=True)
