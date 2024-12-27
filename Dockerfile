@@ -27,5 +27,5 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 EXPOSE 5000
 
 # Start the Flask application
-CMD ["python", "main.py"]
+CMD ["python", "test1.py"]
 
