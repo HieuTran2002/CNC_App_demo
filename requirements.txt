@@ -9,7 +9,6 @@ Jinja2
 MarkupSafe
 numpy
 opencv-python
-redis
 requests
 urllib3
 Werkzeug
