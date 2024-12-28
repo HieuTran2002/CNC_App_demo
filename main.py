@@ -39,19 +39,6 @@ class FlaskApp:
                     os.remove(file_path)
                     print(f"Removed: {file_path}")
 
-    def register_routes(self):
-        """Main routes""" 
-        self.app.route('/')(self.pdf_viewer)
-        self.app.route('/ft')(self.finetune_viewer)
-        self.app.route('/image')(self.image)
-        self.app.route('/video_feed')(self.video_feed)
-        self.app.route('/upload', methods=['POST'])(self.upload_file)
-        self.app.route('/uploads/<filename>')(self.serve_file)
-        self.app.route('/trigger_button', methods=['POST'])(self.trigger_button)
-        self.app.route('/process_image', methods=['POST'])(self.process_image)
-        self.app.route('/get_image_path/<element_id>', methods=['GET'])(self.get_image_path)
-        self.app.route('/manual')(self.manual)
-
     def register_event_handlers(self):
         def on_button_click(data):
             print(f"Button clicked! Data: {data}")
@@ -186,9 +173,21 @@ class FlaskApp:
         self.event_manager.trigger_event("button_clicked", data)
         return jsonify({"status": "success"})
 
-
     def run(self, debug=False):
         self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
+
+    def register_routes(self):
+        """Main routes""" 
+        self.app.route('/')(self.pdf_viewer)
+        self.app.route('/ft')(self.finetune_viewer)
+        self.app.route('/image')(self.image)
+        self.app.route('/video_feed')(self.video_feed)
+        self.app.route('/upload', methods=['POST'])(self.upload_file)
+        self.app.route('/uploads/<filename>')(self.serve_file)
+        self.app.route('/trigger_button', methods=['POST'])(self.trigger_button)
+        self.app.route('/process_image', methods=['POST'])(self.process_image)
+        self.app.route('/get_image_path/<element_id>', methods=['GET'])(self.get_image_path)
+        self.app.route('/manual')(self.manual)
 
 if __name__ == '__main__':
     flask_app = FlaskApp()
