@@ -70,7 +70,7 @@ class AppEventManager:
                     self.events[event_name].invoke(data)
                 self.event_queue.task_done()
             except Exception as e:
-                print(e)
+                _ = e
                 continue
 
     def trigger_event(self, event_name: str, data: dict):

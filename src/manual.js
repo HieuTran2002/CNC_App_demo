@@ -65,7 +65,7 @@ sendAllButton.addEventListener('click', () => {
 
 // upload file
 const fileInput = document.getElementById('fileInput');
-const uploadButton = document.getElementById('manual-import-btn');
+const uploadButton = document.getElementById('manual-import-button');
 const textField = document.getElementById('textField');
 
 uploadButton.addEventListener('click', () => {
