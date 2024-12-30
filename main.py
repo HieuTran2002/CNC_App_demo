@@ -73,8 +73,6 @@ class FlaskApp:
         file_path = os.path.join(self.app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
 
-        self.handle_send_image('src/pics/loyd2.jpg', 'result1')
-
         return jsonify({'message': 'File processed', 'result': file_path})
 
     def serve_file(self, filename):
@@ -116,7 +114,7 @@ class FlaskApp:
         @self.socketio.on('request_image')
         def handle_image_request(data):
             print(data['path'], data['id'])
-            self.handle_send_image(data['path'], data['id'])
+            self.send_image(data['path'], data['id'])
 
         @self.socketio.on('table/random_row')
         def generate_random_row():
@@ -126,7 +124,7 @@ class FlaskApp:
             self.socketio.emit('table/control', {'isEnable': '0'})
             for i in range(10):
                 unique_id = str(self.table_count)
-                columns = [f"{random.randint(1, 100)}" for i in range(1, 7)]
+                columns = [f"{random.randint(1, 100)}" for i in range(1, 6)]
                 self.add_row({'id': unique_id, 'columns': columns})
                 self.table_count += 1
                 sleep(1)
@@ -135,7 +133,7 @@ class FlaskApp:
     def add_row(self, row):
         self.socketio.emit('table/add_row', row)
 
-    def handle_send_image(self, image, id):
+    def send_image(self, image, id):
         image_path = image
         with open(image_path, 'rb') as img_file:
             img_data = img_file.read()
@@ -143,6 +141,21 @@ class FlaskApp:
 
         # Sending the image along with the ID in the message
         response = {'id': id, 'image': base64_image}
+        self.socketio.emit('image_data', response)
+
+    def send_matlike(self, image, id):
+        # Encode the Mat-like image to JPEG
+        success, buffer = cv2.imencode('.jpg', image)
+        if not success:
+            raise ValueError("Failed to encode image.")
+
+        # Convert the encoded image to base64
+        base64_image = base64.b64encode(buffer).decode('utf-8')
+
+        # Prepare the response
+        response = {'id': id, 'image': base64_image}
+
+        # Emit the data through the socket
         self.socketio.emit('image_data', response)
 
     def finetune_viewer(self):
@@ -173,7 +186,8 @@ class FlaskApp:
         self.app.route('/manual')(self.manual)
 
     def run(self, debug=False):
-        self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
+        # self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
+        self.socketio.run(self.app, host='0.0.0.0', port=self.app.config['PORT'], debug=debug)
 
 if __name__ == '__main__':
     flask_app = FlaskApp()
@@ -183,6 +197,5 @@ if __name__ == '__main__':
     atexit.register(flask_app.cleanup_upload_folder)
 
     # Start the server
-    # flask_app.run(debug=True)
-    flask_app.socketio.run(flask_app.app, host='0.0.0.0', port=5000, debug=True)
+    flask_app.run(debug=True)
 

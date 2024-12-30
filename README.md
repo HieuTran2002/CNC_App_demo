@@ -6,15 +6,16 @@
 from main import FlaskApp
 import cv2
 
-def theFunction(data):
-    image = cv2.imread("./src/pics/loyd.jpeg")
-    app.send_image_to_server(image, 'result1')
-
 app = FlaskApp()
+
+def theFunction(data):
+    image = cv2.imread("src/pics/loyd2.jpg")
+    app.send_matlike(image, 'result1')
+
+
 app.event_manager.button_clicked += theFunction
-
-
 app.run()
+
 ```
 
 ## Containerd - Run with camera and port binding.

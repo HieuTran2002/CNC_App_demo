@@ -5,22 +5,6 @@ function requestImage() {
     socket.emit('request_image', { id: 'result1', path:'src/pics/loyd2.jpg' });
 }
 
-// Function to toggle highlight class
-function toggleHighlight(checkbox) {
-    const row = checkbox.closest("tr"); // Get the parent row of the checkbox
-    if (checkbox.checked) {
-        row.classList.add("bg-green-100"); // Add highlight class
-    } else {
-        row.classList.remove("bg-green-100"); // Remove highlight class
-    }
-}
-
-// Load CSV and populate the table on page load
-window.onload = function() {
-    console.log("request image")
-    requestImage();
-};
-
 document.addEventListener("DOMContentLoaded", () => {
     // Listen for the 'table/add_row' event from the server
     socket.on("table/add_row", (data) => {
@@ -44,12 +28,17 @@ document.addEventListener("DOMContentLoaded", () => {
             </tr>`;
         tableBody.innerHTML += rowHTML;
     });
-
-    // Emit request for a new row when the button is clicked
-    addRowButton.addEventListener("click", () => {
-        socket.emit("table/random_row");
-    });
 });
+
+function toggleHighlight(checkbox) {
+    // Function to toggle highlight class
+    const row = checkbox.closest("tr"); // Get the parent row of the checkbox
+    if (checkbox.checked) {
+        row.classList.add("bg-green-100"); // Add highlight class
+    } else {
+        row.classList.remove("bg-green-100"); // Remove highlight class
+    }
+}
 
 // Enable/Disable user interaction
 socket.on("table/control", (data) => {
@@ -67,3 +56,10 @@ function toggleHighlight(checkbox) {
     console.log("highlight")
     row.classList.toggle("bg-green-200", checkbox.checked);
 }
+
+window.onload = function() {
+    console.log("request image")
+    socket.emit("table/random_row");
+    requestImage();
+};
+

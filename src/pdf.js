@@ -92,7 +92,6 @@ async function uploadFile(file) {
         if (!response.ok) {
             throw new Error('File upload failed.');
         }
-        alert('File uploaded successfully!');
     } catch (error) {
         console.error('Error uploading file:', error);
         alert('Error uploading file.');

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block navbtn %}
-<button class="mx-1 rounded bg-green-300 px-3 py-1 hover:bg-pink-300 transform transition-transform duration-300 hover:scale-125" onclick="triggerEvent("finetune_confirm)" >Fine-tune</button>
+<button class="mx-1 font-semibold rounded bg-green-300 px-3 py-1 hover:bg-pink-300 transform transition-transform duration-300 hover:scale-125" onclick="triggerEvent("finetune_confirm)" >Fine-tune</button>
 {% endblock %}
 
 {% block content %}
@@ -18,18 +18,16 @@
             <thead class="text-black">
               <tr>
                 <th scope="col" class="px-3 py-1">ID</th>
-                <th scope="col" class="px-3 py-1">Column 1</th>
-                <th scope="col" class="px-3 py-1">Column 2</th>
-                <th scope="col" class="px-3 py-1">Column 3</th>
-                <th scope="col" class="px-3 py-1">Column 4</th>
-                <th scope="col" class="px-3 py-1">Column 5</th>
-                <th scope="col" class="px-3 py-1">Column 6</th>
-                <th scope="col" class="px-3 py-1">Action</th>
+                <th scope="col" class="px-3 py-1">Nominal</th>
+                <th scope="col" class="px-3 py-1">Value</th>
+                <th scope="col" class="px-3 py-1">Tolerance</th>
+                <th scope="col" class="px-3 py-1">Measuring</th>
+                <th scope="col" class="px-3 py-1">Offset</th>
+                <th scope="col" class="px-3 py-1">Select</th>
               </tr>
             </thead>
             <tbody class="bg-white"></tbody>
           </table>
-          <button id="addRowBtn" class="mt-4 px-4 py-2 bg-green-400 text-black rounded">Add Row</button>
         </div>
 
         <script>
