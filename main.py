@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, Response, send_from_directory
-import requests
+from flask_socketio import SocketIO
 import base64
 import cv2
 import numpy as np
@@ -8,9 +8,15 @@ from webcam_manager import WebcamManager
 from event_manager import AppEventManager
 
 class FlaskApp:
+    app = Flask(__name__, template_folder="src", static_folder="src")
+    # websocket
+    socketio = SocketIO(app)
+    table_count = 0
+
     def __init__(self):
-        self.app = Flask(__name__, template_folder="src", static_folder="src")
         self.app.config['UPLOAD_FOLDER'] = 'uploads'
+        self.app.config['SECRET_KEY'] = 'your_secret_key'
+
         self.app.config['PORT'] = 5000
 
         self.webcam_manager = WebcamManager()
@@ -18,6 +24,8 @@ class FlaskApp:
 
         # Register routes
         self.register_routes()
+
+        self.register_websocket_events()
 
         # Register event handlers
         self.register_event_handlers()
@@ -65,6 +73,8 @@ class FlaskApp:
         file_path = os.path.join(self.app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
 
+        self.handle_send_image('src/pics/loyd2.jpg', 'result1')
+
         return jsonify({'message': 'File processed', 'result': file_path})
 
     def serve_file(self, filename):
@@ -81,11 +91,6 @@ class FlaskApp:
         _, buffer = cv2.imencode('.jpg', frame)
         return buffer.tobytes()
 
-    def image(self):
-        """No longer used"""
-        uploaded_files = cv2.imread("src/pics/loyd.jpeg")
-        return Response(self.encode_frame(uploaded_files), mimetype='image/jpeg')
-
     def generate_frames(self):
         """Generator for video streaming"""
         while True:
@@ -98,61 +103,6 @@ class FlaskApp:
 
             yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-    def process_image(self):
-        """Endpoint to receive image and ID to post it onto the target element."""
-        data = request.json
-
-        if not data or 'image' not in data or 'element_id' not in data:
-            return jsonify({'error': 'Missing image or element_id'}), 400
-
-        # Decode the base64 image data
-        try:
-            image_data = base64.b64decode(data['image'])
-            np_arr = np.frombuffer(image_data, dtype=np.uint8)
-            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        except Exception as e:
-            return jsonify({'error': f'Error decoding image: {str(e)}'}), 400
-
-        # Get the element ID
-        element_id = data['element_id']
-
-        # Here you can process the image, e.g., save it or do other operations
-        image_path = os.path.join(self.app.config['UPLOAD_FOLDER'], f"{element_id}.jpg")
-        cv2.imwrite(image_path, img)
-
-        # Respond with the saved image path (or any other info)
-        return jsonify({'message': 'Image processed and saved', 'image_path': image_path})
-
-    def send_image_to_server(self, mat_image, element_id):
-        """Function for users to send their Mat image and ID directly."""
-        _, img_buffer = cv2.imencode('.jpg', mat_image)
-        img_bytes = img_buffer.tobytes()
-        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-
-        # Define the URL of the Flask API endpoint
-        url = f"http://localhost:{self.app.config['PORT']}/process_image"
-
-        # Create the payload with the base64 image and element ID
-        payload = {'image': img_base64, 'element_id': element_id}
-
-        # Send POST request to the Flask server
-        response = requests.post(url, json=payload)
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return {'error': 'Failed to process image', 'details': response.json()}
-
-    def get_image_path(self, element_id):
-        """Return the image path based on the element_id."""
-        image_path = os.path.join(self.app.config['UPLOAD_FOLDER'], f"{element_id}.jpg")
-
-        # Check if the image exists
-        if not os.path.exists(image_path):
-            return jsonify({'error': 'Image not found'}), 404
-
-        return jsonify({'image_path': f"/uploads/{element_id}.jpg"})
-
     def video_feed(self):
         return Response(self.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -160,6 +110,40 @@ class FlaskApp:
         data = request.json
         self.event_manager.trigger_event("button_clicked", data)
         return jsonify({"status": "success"})
+
+    def register_websocket_events(self):
+        """Register WebSocket events."""
+        @self.socketio.on('request_image')
+        def handle_image_request(data):
+            print(data['path'], data['id'])
+            self.handle_send_image(data['path'], data['id'])
+
+        @self.socketio.on('table/random_row')
+        def generate_random_row():
+            # Randomly generate data for 6 columns, keeping ID unique
+            import random
+            from time import sleep
+            self.socketio.emit('table/control', {'isEnable': '0'})
+            for i in range(10):
+                unique_id = str(self.table_count)
+                columns = [f"{random.randint(1, 100)}" for i in range(1, 7)]
+                self.add_row({'id': unique_id, 'columns': columns})
+                self.table_count += 1
+                sleep(1)
+            self.socketio.emit('table/control', {'isEnable': '1'})
+
+    def add_row(self, row):
+        self.socketio.emit('table/add_row', row)
+
+    def handle_send_image(self, image, id):
+        image_path = image
+        with open(image_path, 'rb') as img_file:
+            img_data = img_file.read()
+            base64_image = base64.b64encode(img_data).decode('utf-8')
+
+        # Sending the image along with the ID in the message
+        response = {'id': id, 'image': base64_image}
+        self.socketio.emit('image_data', response)
 
     def finetune_viewer(self):
         return render_template('finetune.html')
@@ -173,18 +157,19 @@ class FlaskApp:
     def table(self):
         return render_template('table.html')
 
+    def index(self):
+        return render_template('index.html')
+
     def register_routes(self):
         """Main routes""" 
         self.app.route('/')(self.pdf_viewer)
+        self.app.route('/index')(self.index)
         self.app.route('/table')(self.table)
         self.app.route('/ft')(self.finetune_viewer)
-        self.app.route('/image')(self.image)
         self.app.route('/video_feed')(self.video_feed)
         self.app.route('/upload', methods=['POST'])(self.upload_file)
         self.app.route('/uploads/<filename>')(self.serve_file)
         self.app.route('/trigger_button', methods=['POST'])(self.trigger_button)
-        self.app.route('/process_image', methods=['POST'])(self.process_image)
-        self.app.route('/get_image_path/<element_id>', methods=['GET'])(self.get_image_path)
         self.app.route('/manual')(self.manual)
 
     def run(self, debug=False):
@@ -198,5 +183,6 @@ if __name__ == '__main__':
     atexit.register(flask_app.cleanup_upload_folder)
 
     # Start the server
-    flask_app.run(debug=True)
+    # flask_app.run(debug=True)
+    flask_app.socketio.run(flask_app.app, host='0.0.0.0', port=5000, debug=True)
 

@@ -23,4 +23,4 @@ function checkForImageUpdates() {
 }
 
 // Set an interval to check for updates every 1 seconds (or adjust as needed)
-setInterval(checkForImageUpdates, 1000);
+// setInterval(checkForImageUpdates, 1000);
