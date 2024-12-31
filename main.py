@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import os
 
+
 class Event:
     def __init__(self):
         self._handlers = []
@@ -35,7 +36,7 @@ class FlaskApp:
     directory = os.path.dirname(os.path.relpath(__file__, '.'))
 
     # handle updload event
-    upload = Event()
+    pdf_uploaded = Event()
 
     # video capture
     cam = cv2.VideoCapture(0)
@@ -84,7 +85,7 @@ class FlaskApp:
         file.save(file_path)
 
         # Emit upload event
-        self.upload()
+        self.pdf_uploaded(file_path)
 
         return jsonify({'message': 'File processed', 'result': file_path})
 

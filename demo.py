@@ -3,12 +3,12 @@ import cv2
 
 app = FlaskApp()
 
-def theFunction():
+def theFunction(data):
     image = cv2.imread("src/pics/loyd2.jpg")
     app.send_matlike(image, 'result1')
-    print("upload")
+    print(f"upload {data}")
 
 
-app.upload += theFunction
+app.pdf_uploaded += theFunction
 app.run()
 

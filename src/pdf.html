@@ -6,21 +6,20 @@
 {% endblock %}
 {% block content %}
 <div id="container" class="mx-auto container">
-  <div class="grid grid-rows-1 grid-flow-col gap-4 w-full overflow-auto">
-    <div class="max-w-full object-contain mx-auto border-2 flex justify-center overflow-auto">
-      <canvas id="source-viewer" class="pdf-viewer"></canvas>
-      <input type="file" id="file-input" accept="application/pdf" style="display: none;">
-    </div>
+    <div class="grid grid-rows-1 grid-flow-col gap-4 w-full overflow-auto">
+        <div class="max-w-full object-contain mx-auto border-2 flex justify-center overflow-auto">
+            <canvas id="source-viewer" class="pdf-viewer"></canvas>
+            <input type="file" id="file-input" accept="application/pdf" style="display: none;">
+        </div>
 
-    <div class="max-w-full object-contain mx-auto border-2 flex justify-center">
-      <!--
-        <canvas id="highlight-viewer" class="pdf-viewer"></canvas>
-      -->
-      <img id="result1" class="object-cover overflow-auto" src="">
+        <div class="max-w-full object-contain mx-auto border-2 flex justify-center">
+            <!--
+                <canvas id="highlight-viewer" class="pdf-viewer"></canvas>
+            -->
+            <img id="result1" class="object-cover overflow-auto" src="">
+        </div>
     </div>
-  </div>
-  <script src="src/script.js"> </script>
-  <script src="src/pdf.js"> </script>
-  <script src="src/imageUpdate.js"> </script>
+    <script src="src/script.js"> </script>
+    <script src="src/pdf.js"> </script>
 </div>
 {% endblock %}

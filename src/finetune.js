@@ -5,29 +5,26 @@ function requestImage() {
     socket.emit('request_image', { id: 'result1', path:'src/pics/loyd2.jpg' });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Listen for the 'table/add_row' event from the server
-    socket.on("table/add_row", (data) => {
-        const rowHTML = `
-            <tr class="bg-white border-b border-gray-700">
-            <td class="px-3 py-1">${data.id}</td>
-            ${data.columns.map((cell, index) => `
-                <td class="px-6 py-1">
-                <div contenteditable="true" 
-                class="editable-cell focus:outline-none focus:ring-2 focus:ring-blue-500">
-                ${cell}
-                </div>
-                </td>`).join("")}
+socket.on("table/add_row", (data) => {
+    const rowHTML = `
+        <tr class="bg-white border-b border-gray-700">
+        <td class="px-3 py-1">${data.id}</td>
+        ${data.columns.map((cell, index) => `
             <td class="px-6 py-1">
-            <div class="flex justify-center items-center">
-            <input id="checkbox-${data.id}" type="checkbox" value="" 
-        class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded" 
-        onclick="toggleHighlight(this)">
+            <div contenteditable="true" 
+            class="editable-cell focus:outline-none focus:ring-2 focus:ring-blue-500">
+            ${cell}
             </div>
-            </td>
-            </tr>`;
-        tableBody.innerHTML += rowHTML;
-    });
+            </td>`).join("")}
+        <td class="px-6 py-1">
+        <div class="flex justify-center items-center">
+        <input id="checkbox-${data.id}" type="checkbox" value="" 
+    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded" 
+    onclick="toggleHighlight(this)">
+        </div>
+        </td>
+        </tr>`;
+    tableBody.innerHTML += rowHTML;
 });
 
 function toggleHighlight(checkbox) {
