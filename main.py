@@ -4,8 +4,26 @@ import base64
 import cv2
 import numpy as np
 import os
-from webcam_manager import WebcamManager
-from event_manager import AppEventManager
+
+class Event:
+    def __init__(self):
+        self._handlers = []
+
+    def __iadd__(self, handler):
+        """Add a handler using the += operator."""
+        self._handlers.append(handler)
+        return self
+
+    def __isub__(self, handler):
+        """Remove a handler using the -= operator."""
+        self._handlers.remove(handler)
+        return self
+
+    def __call__(self, *args, **kwargs):
+        """Invoke all handlers when the event is called."""
+        for handler in self._handlers:
+            handler(*args, **kwargs)
+
 
 class FlaskApp:
     app = Flask(__name__, template_folder="src", static_folder="src")
@@ -13,22 +31,25 @@ class FlaskApp:
     socketio = SocketIO(app)
     table_count = 0
 
+    # parent folder
+    directory = os.path.dirname(os.path.relpath(__file__, '.'))
+
+    # handle updload event
+    upload = Event()
+
+    # video capture
+    cam = cv2.VideoCapture(0)
+
     def __init__(self):
-        self.app.config['UPLOAD_FOLDER'] = 'uploads'
+        self.app.config['UPLOAD_FOLDER'] = os.path.join(self.directory, 'uploads')
         self.app.config['SECRET_KEY'] = 'your_secret_key'
 
         self.app.config['PORT'] = 5000
-
-        self.webcam_manager = WebcamManager()
-        self.event_manager = AppEventManager()
 
         # Register routes
         self.register_routes()
 
         self.register_websocket_events()
-
-        # Register event handlers
-        self.register_event_handlers()
 
         # Remove all remaining files in 'uploads' from the last session
         self.cleanup_upload_folder()
@@ -47,17 +68,6 @@ class FlaskApp:
                     os.remove(file_path)
                     print(f"Removed: {file_path}")
 
-    def register_event_handlers(self):
-        def on_button_click(data):
-            print(f"Button clicked! Data: {data}")
-
-        def on_data_received(data):
-            print(f"Data received: {data}")
-
-        # Subscribe to events
-        self.event_manager.button_clicked += on_button_click
-        self.event_manager.data_received += on_data_received
-
     def upload_file(self):
         """Save PDF file into uploads directoty."""
         if 'pdf' not in request.files:
@@ -72,6 +82,9 @@ class FlaskApp:
 
         file_path = os.path.join(self.app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
+
+        # Emit upload event
+        self.upload()
 
         return jsonify({'message': 'File processed', 'result': file_path})
 
@@ -92,7 +105,7 @@ class FlaskApp:
     def generate_frames(self):
         """Generator for video streaming"""
         while True:
-            frame = self.webcam_manager.get_frame()
+            ret, frame = self.cam.read()
             if frame is None:
                 break
 
@@ -105,8 +118,6 @@ class FlaskApp:
         return Response(self.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
     def trigger_button(self):
-        data = request.json
-        self.event_manager.trigger_event("button_clicked", data)
         return jsonify({"status": "success"})
 
     def register_websocket_events(self):
@@ -134,7 +145,7 @@ class FlaskApp:
         self.socketio.emit('table/add_row', row)
 
     def send_image(self, image, id):
-        image_path = image
+        image_path = os.path.join(self.directory, image)
         with open(image_path, 'rb') as img_file:
             img_data = img_file.read()
             base64_image = base64.b64encode(img_data).decode('utf-8')
@@ -178,12 +189,12 @@ class FlaskApp:
         self.app.route('/')(self.pdf_viewer)
         self.app.route('/index')(self.index)
         self.app.route('/table')(self.table)
+        self.app.route('/manual')(self.manual)
         self.app.route('/ft')(self.finetune_viewer)
         self.app.route('/video_feed')(self.video_feed)
-        self.app.route('/upload', methods=['POST'])(self.upload_file)
         self.app.route('/uploads/<filename>')(self.serve_file)
+        self.app.route('/upload', methods=['POST'])(self.upload_file)
         self.app.route('/trigger_button', methods=['POST'])(self.trigger_button)
-        self.app.route('/manual')(self.manual)
 
     def run(self, debug=False):
         # self.app.run(host="0.0.0.0", debug=debug, port=self.app.config['PORT'])
